@@ -39,6 +39,19 @@ class List(object):
         card_data = json.loads(resp.text)
         card_id = card_data['id']
         return Card(self._client, card_id, card_data)
+    def cards(self):
+        url = "https://trello.com/1/lists/{}".format(self.id)
+        data = {
+            'key': self._client._api_key,
+            'token': self._client._token,
+            'cards': 'open',
+        }
+        resp = requests.get(url, params=data)
+        cards_json = resp.json['cards']
+        json_to_card = lambda card_data: Card(self._client, card_data['id'], data=card_data)
+        cards = [json_to_card(j) for j in cards_json]
+        return cards
+
 
 
 class Card(object):
@@ -69,5 +82,6 @@ class Card(object):
         data['token'] = self._client._token
         resp = requests.put("https://trello.com/1/cards/{}".format(self.id), params=data)
         return resp
+
 
 
